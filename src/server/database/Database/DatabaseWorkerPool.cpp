@@ -58,10 +58,16 @@ DatabaseWorkerPool<T>::DatabaseWorkerPool()
     : _queue(new ProducerConsumerQueue<SQLOperation*>()),
       _async_threads(0), _synch_threads(0)
 {
+    unsigned long mysql_version_id;
+    const char* mysql_version;
+
+    mariadb_get_infov(NULL, MARIADB_CLIENT_VERSION_ID, &mysql_version_id);
+    mariadb_get_infov(NULL, MARIADB_CLIENT_VERSION, &mysql_version);
+
     WPFatal(mysql_thread_safe(), "Used MySQL library isn't thread-safe.");
-    WPFatal(mysql_get_client_version() >= MIN_MYSQL_CLIENT_VERSION, "TrinityCore does not support MySQL versions below " MIN_MYSQL_CLIENT_VERSION_STRING " (found %s id %lu, need id >= %u), please update your MySQL client library", mysql_get_client_info(), mysql_get_client_version(), MIN_MYSQL_CLIENT_VERSION);
-    WPFatal(mysql_get_client_version() == MYSQL_VERSION_ID, "Used MySQL library version (%s id %lu) does not match the version id used to compile TrinityCore (id %u). Search on forum for TCE00011.",
-        mysql_get_client_info(), mysql_get_client_version(), MYSQL_VERSION_ID);
+    WPFatal(mysql_version_id >= MIN_MYSQL_CLIENT_VERSION, "TrinityCore does not support MySQL versions below " MIN_MYSQL_CLIENT_VERSION_STRING " (found %s id %lu, need id >= %u), please update your MySQL client library", mysql_version, mysql_version_id, MIN_MYSQL_CLIENT_VERSION);
+    WPFatal(mysql_version_id == MYSQL_VERSION_ID, "Used MySQL library version (%s id %lu) does not match the version id used to compile TrinityCore (id %u). Search on forum for TCE00011.",
+        mysql_version, mysql_version_id, MYSQL_VERSION_ID);
 }
 
 template <class T>
